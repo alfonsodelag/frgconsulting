@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { AiFillPauseCircle, AiFillPlayCircle } from "react-icons/ai";
 import { CiPause1, CiPlay1 } from "react-icons/ci";
 import ArrowDown from "../../assets/png/arrow-down.png";
@@ -7,16 +7,21 @@ import SearchIcon from "../../assets/png/search-icon.png";
 import Spinner from "../Spinner/Spinner";
 
 const PodcastList = ({ filteredPodcasts, isLoading }) => {
-  const [currentPlaying, setCurrentPlaying] = useState(null);
+  const [currentPlaying, setCurrentPlaying] = useState({
+    audio: null,
+    trackId: null,
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortedPodcasts, setSortedPodcasts] = useState([...filteredPodcasts]);
 
-  console.log("filteredPodcasts", filteredPodcasts);
+  const audioRefs = useRef({});
 
   const togglePlayPause = (id) => {
-    const audioElement = document.getElementById(`audio-${id}`);
+    const audioElement = audioRefs.current[id];
 
-    if (currentPlaying && currentPlaying !== audioElement) {
-      currentPlaying.pause();
-      setCurrentPlaying(null);
+    if (currentPlaying.audio && currentPlaying.audio !== audioElement) {
+      currentPlaying.audio.pause();
+      setCurrentPlaying({ audio: null, trackId: null });
     }
 
     if (audioElement.paused) {
@@ -24,7 +29,7 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
       if (playPromise !== undefined) {
         playPromise
           .then((_) => {
-            setCurrentPlaying(audioElement);
+            setCurrentPlaying({ audio: audioElement, trackId: id });
           })
           .catch((error) => {
             console.error("Playback failed:", error);
@@ -32,8 +37,28 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
       }
     } else {
       audioElement.pause();
-      setCurrentPlaying(null);
+      setCurrentPlaying({ audio: null, trackId: null });
     }
+  };
+
+  const currentlyPlayingPodcast = filteredPodcasts?.find(
+    (podcast) => podcast.trackId === currentPlaying.trackId,
+  );
+
+  const sortAscending = () => {
+    const sorted = [...sortedPodcasts].sort((a, b) =>
+      a.trackName.localeCompare(b.trackName),
+    );
+    setSortedPodcasts(sorted);
+    setIsModalOpen(false);
+  };
+
+  const sortDescending = () => {
+    const sorted = [...sortedPodcasts].sort((a, b) =>
+      b.trackName.localeCompare(a.trackName),
+    );
+    setSortedPodcasts(sorted);
+    setIsModalOpen(false);
   };
 
   return (
@@ -43,25 +68,59 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
           <AiFillPauseCircle
             className="cursor-pointer"
             size={80}
-            onClick={() => togglePlayPause(currentPlaying.id)}
+            onClick={() => {
+              if (currentPlaying.audio) {
+                togglePlayPause(currentPlaying.trackId);
+              }
+            }}
           />
         ) : (
           <>
             {currentPlaying === null ? (
-              <AiFillPlayCircle className="cursor-default" size={80} />
+              <AiFillPlayCircle
+                className="cursor-default"
+                size={80}
+                onClick={() => togglePlayPause(currentPlaying.trackId)}
+              />
             ) : (
               <AiFillPlayCircle
                 className="cursor-pointer"
                 size={80}
-                onClick={() => togglePlayPause(currentPlaying.id)}
+                onClick={() => togglePlayPause(currentPlaying.trackId)}
               />
             )}
           </>
         )}
-        <div className="flex justify-between w-1/6">
+        <h1>
+          {currentlyPlayingPodcast
+            ? currentlyPlayingPodcast.trackName
+            : "No Podcast Playing"}
+        </h1>
+        <div className="flex justify-between w-1/6 relative">
           <img src={SearchIcon} alt="Magnifying Glass" />
           <p style={{ fontSize: "16px" }}>Order by</p>
-          <img src={ArrowDown} alt="down" width={18} height={18} />
+          <img
+            src={ArrowDown}
+            alt="down"
+            width={18}
+            height={18}
+            onClick={() => setIsModalOpen(!isModalOpen)}
+          />
+          {isModalOpen && (
+            <div
+              className="absolute top-24 left-1/2 bg-white text-black p-5 rounded-md"
+              style={{
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <p className="cursor-pointer" onClick={sortAscending}>
+                Sort Ascending
+              </p>
+              <p className="cursor-pointer" onClick={sortDescending}>
+                Sort Descending
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <table className="min-w-full table-auto">
@@ -88,7 +147,7 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
           {isLoading ? (
             <Spinner />
           ) : (
-            filteredPodcasts?.map((podcast, index) => (
+            sortedPodcasts?.map((podcast, index) => (
               <tr
                 key={podcast.trackId}
                 style={{
@@ -123,7 +182,7 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
                       onClick={() => togglePlayPause(podcast.trackId)}
                     />
                     <audio
-                      id={`audio-${podcast.trackId}`}
+                      ref={(el) => (audioRefs.current[podcast.trackId] = el)}
                       src={podcast.audioUrl}
                     ></audio>
                     <div>

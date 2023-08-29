@@ -3,6 +3,7 @@ import "./App.css";
 import Header from "./components/Header/Header";
 import PodcastList from "./components/PodcastsList/PodcastList";
 import SearchBar from "./components/SearchBar/SearchBar";
+import Spinner from "./components/Spinner/Spinner";
 
 function App() {
   const [podcasts, setPodcasts] = useState([]);
@@ -11,18 +12,18 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Using allorigins proxy to bypass CORS restrictions
-    const proxyURL = "https://api.allorigins.win/get?url=";
+    // Using allorigins proxy with the 'raw' option to bypass CORS restrictions
+    const proxyURL = "https://api.allorigins.win/raw?url=";
     const encodedAPIURL = encodeURIComponent(
       "https://itunes.apple.com/search?term=podcast&entity=podcast",
     );
 
     // Fetching podcasts from the Apple iTunes API using the allorigins proxy
     fetch(proxyURL + encodedAPIURL)
-      .then((response) => response.json())
-      .then(async (data) => {
-        const parsedData = JSON.parse(data.contents);
-        const podcasts = parsedData.results;
+      .then((response) => response.text())
+      .then(async (textData) => {
+        const data = JSON.parse(textData); // Parse the string to a JSON object
+        const podcasts = data.results;
 
         // Fetch audio URLs for each podcast and update the podcast object
         const updatedPodcasts = await Promise.all(
@@ -51,7 +52,6 @@ function App() {
         setIsLoading(false);
       })
       .catch((error) => console.error("Error fetching podcasts:", error));
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -62,6 +62,17 @@ function App() {
     );
     setFilteredPodcasts(results);
   }, [podcasts, searchTerm]);
+
+  if (isLoading) {
+    return (
+      <div className="App flex justify-center items-center">
+        <div>
+          <Spinner />
+          <h1 className="text-white">Loading....</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="App flex justify-center">
