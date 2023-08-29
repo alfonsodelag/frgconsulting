@@ -1,0 +1,9 @@
+.App {
+  background: linear-gradient(
+      0deg,
+      rgba(10, 10, 10, 0.2) 0%,
+      rgba(10, 10, 10, 0.2) 100%
+    ),
+    linear-gradient(155deg, #1b1b1b 0%, #14151f 100%);
+  min-height: 100vh;
+}
