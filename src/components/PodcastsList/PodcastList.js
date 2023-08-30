@@ -221,27 +221,36 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
 
                   {/* Play/Pause icon logic */}
                   {currentPlaying.audio && currentPlaying.trackId ? (
-                    <CiPause1
-                      style={{ color: "white" }}
-                      className="cursor-pointer"
+                    <div
+                      className="flex justify-center items-center rounded-full w-14 h-14 cursor-pointer"
+                      style={{ backgroundColor: "#5C67DE" }}
                       onClick={() => {
                         if (currentPlaying.trackId && currentPlaying.audio) {
                           togglePlayPause(currentPlaying.trackId);
                         }
                       }}
-                    />
+                    >
+                      <CiPause1
+                        style={{ color: "white" }}
+                        size={30} // Adjust the size as required
+                      />
+                    </div>
                   ) : (
-                    <CiPlay1
-                      style={{ color: "white" }}
-                      className="cursor-pointer"
+                    <div
+                      className="flex justify-center items-center rounded-full w-14 h-14 cursor-pointer"
+                      style={{ backgroundColor: "#5C67DE" }}
                       onClick={() => {
                         if (currentPlaying.trackId && currentPlaying.audio) {
                           togglePlayPause(currentPlaying.trackId);
                         }
                       }}
-                    />
+                    >
+                      <CiPlay1
+                        style={{ color: "white" }}
+                        size={30} // Adjust the size as required
+                      />
+                    </div>
                   )}
-
                   <img
                     src={StepForward}
                     alt="step-forward"
