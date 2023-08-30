@@ -12,8 +12,6 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
     trackId: null,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sortedPodcasts, setSortedPodcasts] = useState([...filteredPodcasts]);
-
   const audioRefs = useRef({});
 
   const togglePlayPause = (id) => {
@@ -45,51 +43,13 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
     (podcast) => podcast.trackId === currentPlaying.trackId,
   );
 
-  const sortAscending = () => {
-    const sorted = [...sortedPodcasts].sort((a, b) =>
-      a.trackName.localeCompare(b.trackName),
-    );
-    setSortedPodcasts(sorted);
-    setIsModalOpen(false);
-  };
-
-  const sortDescending = () => {
-    const sorted = [...sortedPodcasts].sort((a, b) =>
-      b.trackName.localeCompare(a.trackName),
-    );
-    setSortedPodcasts(sorted);
-    setIsModalOpen(false);
-  };
-
   return (
     <>
       <div className="flex w-full justify-between text-white items-center mb-5">
-        {currentPlaying ? (
-          <AiFillPauseCircle
-            className="cursor-pointer"
-            size={80}
-            onClick={() => {
-              if (currentPlaying.audio) {
-                togglePlayPause(currentPlaying.trackId);
-              }
-            }}
-          />
+        {currentPlaying.audio && currentPlaying.trackId ? (
+          <AiFillPauseCircle className="cursor-pointer" size={80} />
         ) : (
-          <>
-            {currentPlaying === null ? (
-              <AiFillPlayCircle
-                className="cursor-default"
-                size={80}
-                onClick={() => togglePlayPause(currentPlaying.trackId)}
-              />
-            ) : (
-              <AiFillPlayCircle
-                className="cursor-pointer"
-                size={80}
-                onClick={() => togglePlayPause(currentPlaying.trackId)}
-              />
-            )}
-          </>
+          <AiFillPlayCircle className="cursor-pointer" size={80} />
         )}
         <h1>
           {currentlyPlayingPodcast
@@ -113,12 +73,8 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
                 transform: "translate(-50%, -50%)",
               }}
             >
-              <p className="cursor-pointer" onClick={sortAscending}>
-                Sort Ascending
-              </p>
-              <p className="cursor-pointer" onClick={sortDescending}>
-                Sort Descending
-              </p>
+              <p className="cursor-pointer">Sort Ascending</p>
+              <p className="cursor-pointer">Sort Descending</p>
             </div>
           )}
         </div>
@@ -147,7 +103,7 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
           {isLoading ? (
             <Spinner />
           ) : (
-            sortedPodcasts?.map((podcast, index) => (
+            filteredPodcasts?.map((podcast, index) => (
               <tr
                 key={podcast.trackId}
                 style={{
@@ -157,15 +113,15 @@ const PodcastList = ({ filteredPodcasts, isLoading }) => {
                 }}
               >
                 <td className="px-4 py-2 pt-4 pb-4">
-                  {document.getElementById(`audio-${podcast.trackId}`)
-                    ?.paused ? (
-                    <CiPlay1
+                  {currentPlaying.audio &&
+                  currentPlaying.trackId === podcast.trackId ? (
+                    <CiPause1
                       style={{ color: "white" }}
                       className="cursor-pointer"
                       onClick={() => togglePlayPause(podcast.trackId)}
                     />
                   ) : (
-                    <CiPause1
+                    <CiPlay1
                       style={{ color: "white" }}
                       className="cursor-pointer"
                       onClick={() => togglePlayPause(podcast.trackId)}

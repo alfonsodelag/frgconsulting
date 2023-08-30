@@ -10,6 +10,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [filteredPodcasts, setFilteredPodcasts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showOnlySearchBar, setShowOnlySearchBar] = useState(false);
 
   useEffect(() => {
     // Using allorigins proxy with the 'raw' option to bypass CORS restrictions
@@ -63,6 +64,14 @@ function App() {
     setFilteredPodcasts(results);
   }, [podcasts, searchTerm]);
 
+  useEffect(() => {
+    if (searchTerm) {
+      setShowOnlySearchBar(false);
+    } else {
+      setShowOnlySearchBar(true);
+    }
+  }, [searchTerm]);
+
   if (isLoading) {
     return (
       <div className="App flex justify-center items-center">
@@ -77,12 +86,20 @@ function App() {
   return (
     <div className="App flex justify-center">
       <div className="w-1/2">
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <Header />
-        <PodcastList
-          filteredPodcasts={filteredPodcasts}
-          isLoading={isLoading}
+        <SearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onBack={() => setShowOnlySearchBar(!showOnlySearchBar)}
         />
+        {!showOnlySearchBar || searchTerm ? (
+          <>
+            <Header />
+            <PodcastList
+              filteredPodcasts={filteredPodcasts}
+              isLoading={isLoading}
+            />
+          </>
+        ) : null}
       </div>
     </div>
   );

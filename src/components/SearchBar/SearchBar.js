@@ -2,11 +2,17 @@ import React from "react";
 import ArrowLeft from "../../assets/png/arrow-left.png";
 import SearchIcon from "../../assets/png/search-icon.png";
 
-const SearchBar = ({ searchTerm, setSearchTerm }) => {
+const SearchBar = ({ searchTerm, setSearchTerm, onBack }) => {
   return (
     <div className="mt-8 mb-5">
       <div className="flex justify-between items-center">
-        <img src={ArrowLeft} alt="arrow left" height={50} width={50} />
+        <img
+          src={ArrowLeft}
+          alt="arrow left"
+          height={50}
+          width={50}
+          onClick={onBack}
+        />
         <div className="flex w-11/12 justify-between items-center relative">
           <input
             type="text"
